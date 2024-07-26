@@ -1,0 +1,69 @@
+﻿ @model CallBackUtility.Models.ApplicationUser
+@{
+    ViewBag.Title = Model.FirstName + " " + Model.LastName;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    dl-horizontal {
+    }
+
+    hr {
+        margin-bottom: 14px;
+    }
+</style>
+<div class="pagetitle">
+    <h1>Delete User</h1>
+</div>
+<hr />
+<h3>Are you sure to delete @ViewBag.Title account?</h3>
+
+
+<div class="container">
+    <div class="dvContainer">
+        <p class="col-md-1">
+            @Html.ActionLink(" ", "Index", null, htmlAttributes: new { @Title = "Back", @class = "btnBack" })
+        </p>
+        <div class="col-md-1"><img class="dvUploadedImage " id="uploadedUserImage" src="@Model.UserProfileImagePath" alt="No Image" /></div>
+        <dl class="dl-horizontal col-md-10">
+
+            <dt>
+                @Html.DisplayNameFor(model => model.FirstName)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.FirstName)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.LastName)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.LastName)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Email)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Email)
+            </dd>
+            <dt>
+               Role
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.RoleId)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.ContactNo)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.ContactNo)
+            </dd>
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                <dd class="form-actions no-color">
+                    <input type="submit" value="Delete" class="btn btnRed btn-default" />
+                </dd>
+            }
+        </dl>
+    </div>
+</div>
+

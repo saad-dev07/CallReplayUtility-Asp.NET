@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="~/Content/favicon.ico" type="image/x-icon" />
+    <title>@ViewBag.Title - Pronet Calls Replay Utility</title>
+    <link href="~/Content/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/Content/bootstrap.css" rel="stylesheet">
+    <link href="~/Content/style.css" rel="stylesheet">
+    <link href="~/Content/sidebar-icons.css" rel="stylesheet">
+    <link href="~/Content/Datatable/datatables.min.css" rel="stylesheet" />
+    <link href="~/Content/fontawesome-free-6.4.0-web/css/all.min.css" rel="stylesheet" />
+    <link href="~/Content/fontawesome-free-6.4.0-web/css/fontawesome.min.css" rel="stylesheet" />
+    <style>
+        hr {
+            border-top: 1px solid dimgray;
+        }
+
+        body {
+            background: url(/Content/img/backgroud-screen.jpg) repeat-y center;
+            background-size: 100%;
+            transition: all 0.5s linear;
+        }
+
+        .panel {
+            background-color: transparent !importantdetails-control
+        }
+
+        span, span:hover, span:focus, span:active, a, a:hover, a:focus, a:active {
+            text-decoration: none !important;
+        }
+
+        .header {
+            background: url(/Content/img/header-background.png) no-repeat center;
+            box-shadow: 1px 3px 3px 3px #00000061;
+            background-size: 100%;
+            transition: all 0.3s;
+        }
+
+        .show {
+            display: flex !important;
+        }
+
+        table > tbody > tr {
+            background-color: transparent !important;
+        }
+
+        main {
+            transition: all 0.3s;
+            margin-left: 0px;
+        }
+
+        .panel-default > .panel-heading {
+            background-color: transparent;
+            border: none !important;
+        }
+
+        .panel-default {
+            border-color: none !important;
+        }
+
+        .panel {
+            border: none;
+            border-radius: 0px;
+        }
+    </style>
+</head>
+<body>
+    <header id="header" class="header fixed-top d-flex align-items-center">
+        <div class="d-flex align-items-center justify-content-between">
+            <a href="#" class="logo d-flex align-items-center">
+                <img src="~/Content/img/logo.png" alt="">
+                <span class="d-none d-lg-block">Pronet Calls Replay Utility</span>
+            </a>
+        </div>
+        <nav class="header-nav ms-auto">
+            <ul class="d-flex align-items-center">
+                @{
+                    CallBackUtility.Models.ApplicationDbContext db = new CallBackUtility.Models.ApplicationDbContext();
+                    string imageLocation = System.Configuration.ConfigurationManager.AppSettings["UserImageUplaodPath"].ToString();
+                    string userPic = imageLocation+ (String.IsNullOrEmpty(User.Identity.Name)?  "ProfileImage.jpg":db.Users.First(x => x.Email == User.Identity.Name).UserProfileImagePath);
+                }
+                <li class="nav-item dropdown pe-3">
+                    <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+                        <img src="@userPic" alt="Profile" class="rounded-circle">
+                        <span class="d-none d-md-block dropdown-toggle ps-2">
+                            @("Hi!  " + (User.Identity.IsAuthenticated? db.Users.First(x=>x.Email==User.Identity.Name).FullName:"User") )
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile" style="background-color: #fafafa;">
+                        <li>
+                            @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <a class="dropdown-item d-flex align-items-center" href="javascript:document.getElementById('logoutForm').submit()">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span>Sign Out</span>
+                                </a>
+                            }
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </header>@if (User.IsInRole(AppRoles.SYSTEMADMIN))
+    {
+    <div class="sticky-icon">
+        <a href="/Users/Index" class="Instagram"><i class="fa fa-user"></i> </a>
+        <a href="/Recordings/Index" class="Facebook"><i class="fa fa-headphones"> </i>  </a>
+    </div>}
+    <main id="main" class="main">
+        @RenderBody()
+    </main>
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center">
+        <i class="fa fa-arrow-up"></i>
+    </a>
+    <script src="~/Content/Scripts/jquery-3.4.1.min.js"></script>
+    <script src="~/Content/Scripts/bootstrap.min.js"></script>
+    <script type="text/javascript" src="~/Content/Scripts/moment.min.js"></script>
+    <script src="~/Content/Datatable/datatables.min.js"></script>
+    <script src="~/Content/Scripts/bootstrap.bundle.min.js"></script>
+    @RenderSection("scripts", required: false)
+   
+</body>
+</html>

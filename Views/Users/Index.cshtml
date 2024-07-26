@@ -1,0 +1,360 @@
+﻿@model System.Web.Mvc.JsonResult
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    table > tbody > tr > td {
+        vertical-align:middle !important;
+            text-align:center;
+    }
+    .btn {
+        margin: 0px !important;
+    }
+
+    .table > tbody > tr > td, table > thead> tr > th {
+        padding: 2px;
+    }
+
+    #nav {
+        width: auto !important;
+        margin-left: 0px !important;
+    }
+
+    #addNewRole {
+        margin-left: 4px;
+    }
+</style>
+<div class="pagetitle">
+    <h1>User Management</h1>
+</div>
+<hr />
+<p>
+    @Html.ActionLink("Create User", "Register", "Account",null,htmlAttributes :new { @class= "btnGreen" })
+</p>
+<div class="row dvContainer section">
+    <table class="table tblBlack table-striped" id="dvHeader">
+        <thead class="tbody">
+            <tr>
+                <th>
+                    User Name
+                </th>
+                <th>
+                    Email Address
+                </th>
+                <th>
+                    Role
+                </th>
+                <th>
+                    Contact Nos
+                </th>
+                 <th>
+     User Snap
+ </th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="teamList"> </tbody>
+    </table>
+    <script id="IssuesTable" type="text/x-jQuery-tmpl">
+        <tr class="oldtr">
+            <td>
+                ${FirstName}
+            </td>
+            <td>
+                ${Email}
+            </td>
+            <td>
+            ${RoleName}
+        </td>
+            <td>
+                {{html ContactNo}}
+            </td>
+            <td>
+                <img src="${UserProfileImagePath}" style="position: relative; margin-top: 0px; border-radius: 50%;" class="_dvUploadedImage" />
+            </td>
+            <td class="col-md-1 tdActions">
+                <a href="/Users/Delete/${Id}"><img src="/Content/img/delete.png" alt="Edit" style="width:25px;height:25px;"></a>
+                <a href="/Account/Edit/${Id}"><img src="/Content/img/edit.png" alt="Edit" style="width:25px;height:25px;"></a>
+            </td>
+        </tr>
+    </script>
+    <label id="lblNoTasksFound"></label>
+    <script id="cityOptions" type="text/x-jQuery-tmpl">
+        <option value="${CityId}">${CityName}</option>
+    </script>
+    <script id="regionOptions" type="text/x-jQuery-tmpl">
+        <option value="${RegionId}">${RegionName}</option>
+    </script>  
+</div>
+@section Scripts {
+ 
+    <script src="~/Content/Scripts/jquery.tmpl.js"></script>
+
+  
+    <script>
+                var loadingCount = 0;
+                var usersTable;
+                var selectedRole = "0";
+                var allIssues = '';
+                $(document).ready(function () {
+                    $("#lblNoTasksFound").text('');
+                    
+                    var issuesViewModel = $.parseJSON('@Html.Raw(Json.Encode(Model.Data))');
+                    allIssues = issuesViewModel;
+                    if (issuesViewModel.length > 0) {
+                        // $("#IssuesTable").tmpl(issuesViewModel).appendTo("#teamList");
+                        $("#lblNoTasksFound").text('');
+                        initTable(issuesViewModel);
+                    } else {
+                        allIssues = '';
+                        $("#dvHeader").hide();
+                        $("#lblNoTasksFound").text('No users found.');
+                    }
+
+                    $('#DepartmentId').change(function (e) {
+                        var selectedDepartmentId = $("#DepartmentId :selected").val();
+                        if (selectedDepartmentId) {
+                            loadRegionsDDL(selectedDepartmentId, "");
+                        } else {
+                            _loadRegionDDL();
+                            //   _loadCitiesDDL(0, 0, "");
+                            _loadASDDL();
+                            _loadFSDDL();
+                        }
+                    });
+
+                    $('#RegionId').change(function (e) {
+                        var selectedDepartmentId = $("#DepartmentId :selected").val();
+                        var selectedRegionId = $("#RegionId :selected").val();
+                        //if (selectedRegionId) {
+                        //    loadCitiesUserDDL(selectedDepartmentId, selectedRegionId, "");
+                        //}
+                    });
+
+                    $('#btnSearch').click(function () {
+                        loadIndex();
+                    });
+
+                    $('#ddlRole').change(function (e) {
+                        e.preventDefault();
+                        selectedRole = $("#ddlRole :selected").val();
+                        var _role = $("#ddlRole :selected").text();
+                        if (_role == "Field Manager" || _role == "Engineer" || _role == "Select All Roles") {
+                            $("#DepartmentId").show();
+
+                            $("#RegionId").show();
+                        } else {
+                            $("#DepartmentId").hide();
+
+                            $("#RegionId").hide();
+                        }
+                    });
+                });
+
+                function initTable(data) {
+                    $("#IssuesTable").tmpl(data).appendTo("#teamList");
+                   
+                    $('#dvHeader').show();
+                    usersTable = $('#dvHeader').DataTable({
+                        lengthMenu: [
+                        [ 10, 20, 30, 50, 100, -1],
+                        ['10', '20', '30', '50', '100', 'Show all']
+                        ]
+                        // , "columnDefs": [{ "targets": [0], "visible": false, "searchable": false }],
+                    });
+                    $('#dvHeader').find('thead').find('th').each(function () {
+                        if ($(this).html() == "Actions") {
+                            $(this).css('background', 'none');
+                        }
+                    });
+                    loadingCount++;
+                }
+
+                function RefreshTable(data) {
+                    $('#dvHeader').show();
+                    if (usersTable != undefined && usersTable != null) {
+                        usersTable.destroy();
+                        $('#teamList').html('');
+                        $("#teamList").html($("#IssuesTable").tmpl(data));
+                        initTable();
+                    }
+                }
+
+                function _loadRegionDDL() {
+                    $.ajax({
+                        url: '/Department/getAllRegions',
+                        type: 'POST',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data.length > 0) {
+                                $('#RegionId').show();
+                                $('#RegionId').html('');
+                                $('#RegionId').html($("#regionOptions").tmpl(data));
+                                $("#RegionId").prepend('<option value="0" selected="selected">Select Region</option>');
+                            }
+                        }
+                   , error: function () { }
+                    });
+                }
+
+                function _loadCitiesDDL(departmentid, regionId, CityNametoselected) {
+                    if (departmentid == 0 && regionId == 0) {//load all cities regardless the department and region
+                        $.ajax({
+                            url: '/City/getAllSectors',
+                            type: 'POST',
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (data) {
+                                if (data.length > 0) {
+                                    $('#CityId').show();
+                                    $('#CityId').html('');
+                                    $('#CityId').html($("#cityOptions").tmpl(data));
+                                    $("#CityId").prepend('<option value="0" selected="selected">Select Sector</option>');
+                                    if ($.trim(CityNametoselected).length > 0) {
+                                        $('select#CityId option').each(function () {
+                                            if ($.trim($(this).text()) == $.trim(CityNametoselected)) {
+                                                $(this).attr("selected", "selected");
+                                            } else { $(this).removeAttr("selected"); }
+                                        });
+                                    }
+                                }
+                            }
+                       , error: function () { }
+                        });
+                    } else {
+                        regionId = regionId ? regionId : 0;
+                        departmentid = departmentid ? departmentid : 0;
+                        var region = JSON.stringify({ regionId: regionId, departmentid: departmentid });
+                        $.ajax({
+                            url: '/City/getCitiesInRegion',
+                            type: 'POST',
+                            data: region,
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (data) {
+                                if (data.length > 0) {
+                                    $('#CityId').show();
+                                    $('#CityId').html($("#cityOptions").tmpl(data));
+                                    if ($.trim(CityNametoselected).length > 0) {
+                                        $('select#CityId option').each(function () {
+                                            if ($.trim($(this).text()) == $.trim(CityNametoselected)) {
+                                                $(this).attr("selected", "selected");
+                                                _loadAreaEngineerDDL(departmentid, regionId, $('#CityId :selected').val(), "");
+                                            } else { $(this).removeAttr("selected"); }
+                                        });
+                                    } else { _loadAreaEngineerDDL(departmentid, regionId, $('#CityId :selected').val(), ""); }
+                                } else { $('#CityId').html(''); $('#CityId').hide(); $('#users_area_incharge').html(''); $('#users_area_incharge').hide(); $('#users_field_incharge').html(''); $('#users_field_incharge').hide(); }
+                            }
+                           , error: function () {
+                               $('#lblMessage').val('City not added!');
+                           }
+                        });
+                    }
+                }
+
+                function _loadASDDL() {
+                    $.ajax({
+                        url: '/User/getAllAreaSupervisors',
+                        type: 'POST',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data.length > 0) {
+                                $('#users_area_incharge').show();
+                                $('#users_area_incharge').html('');
+                                $('#users_area_incharge').html($("#AreaInchargeOptions").tmpl(data));
+                                $("#users_area_incharge").prepend('<option value="0" selected="selected">Select Field Manager</option>');
+                            }
+                        }
+                   , error: function () { }
+                    });
+                }
+
+                function _loadFSDDL() {
+                    $.ajax({
+                        url: '/User/getAllFieldSupervisors',
+                        type: 'POST',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data.length > 0) {
+                                $('#users_field_incharge').show();
+                                $('#users_field_incharge').html('');
+                                $('#users_field_incharge').html($("#FieldInchargeOptions").tmpl(data));
+                                $("#users_field_incharge").prepend('<option value="0" selected="selected">Select Engineer</option>');
+                            }
+                        }
+                   , error: function () { }
+                    });
+                }
+
+                function loadCitiesUserDDL(departmentid, regionId, CityNametoselected) {
+                    if (departmentid == 0 && regionId == 0) {//load all cities regardless the department and region
+                        $.ajax({
+                            url: '/City/getAllCities',
+                            type: 'POST',
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (data) {
+                                if (data.length > 0) {
+                                    $('#CustomerCityId').html('');
+                                    $('#CustomerCityId').html($("#cityOptions").tmpl(data));
+                                    if ($.trim(CityNametoselected).length > 0) {
+                                        $('select#CustomerCityId option').each(function () {
+                                            if ($.trim($(this).text()) == $.trim(CityNametoselected)) {
+                                                $(this).attr("selected", "selected");
+                                            } else { $(this).removeAttr("selected"); }
+                                        });
+                                    }
+                                } else { $('#CustomerCityId').html(''); }
+                            }
+                       , error: function () { }
+                        });
+                    } else {
+                        departmentid = (departmentid) ? departmentid : 0;
+                        var region = JSON.stringify({ regionId: regionId, departmentid: departmentid });
+                        $.ajax({
+                            url: '/City/getCitiesInRegion',
+                            type: 'POST',
+                            data: region,
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (data) {
+                                if (data.length > 0) {
+                                    $('#CityId').show();
+                                    $('#CityId').html($("#cityOptions").tmpl(data));
+                                    if ($.trim(CityNametoselected).length > 0) {
+                                        $('select#CityId option').each(function () {
+                                            if ($.trim($(this).text()) == $.trim(CityNametoselected)) {
+                                                $(this).attr("selected", "selected");
+                                                loadAreaEngineerDDL(departmentid, regionId, $('#CityId :selected').val(), "");
+                                            } else { $(this).removeAttr("selected"); }
+                                        });
+                                    } else { loadAreaEngineerDDL(departmentid, regionId, $('#CityId :selected').val(), ""); }
+                                } else { $('#CityId').html(''); $('#CityId').hide(); $('#users_area_incharge').html(''); $('#users_area_incharge').hide(); $('#users_field_incharge').html(''); $('#users_field_incharge').hide(); }
+                            }
+                           , error: function () {
+                               $('#lblMessage').val('City not added!');
+                           }
+                        });
+                    }
+                }
+
+                function loadIndex() {
+                    var search = JSON.stringify({ roleid: selectedRole, RegionId: $('#RegionId :selected').val(), DepartmentId: $('#DepartmentId :selected').val() });
+                    $.ajax({
+                        url: '/User/IndexAjax',
+                        type: 'POST',
+                        data: search,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data.length > 0) {
+                                $("#dvHeader").show();
+                                //$("#teamList").html($("#IssuesTable").tmpl(data));
+                                $("#lblNoTasksFound").text('');
+                                RefreshTable(data);
+                            } else {
+                                $('.tbody').find('.oldtr').remove();
+                                $("#dvHeader").hide();
+                                $("#lblNoTasksFound").text('No users found.');
+                            }
+                        }
+                    });
+                }
+    </script>
+}

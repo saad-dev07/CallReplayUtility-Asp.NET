@@ -1,0 +1,111 @@
+﻿body {
+    background: url(/Content/img/backgroud-screen.jpg) repeat-y center;
+    background-size: 100%;
+    transition: all 0.5s linear;
+}
+ 
+._nav-container {   
+    height: 100% !important;
+    min-height: 100%;
+    background: url(/Content/img/sidebar.png) repeat-y center;
+    background-size: 100%;
+    position: absolute;
+    width: 300px;
+    box-shadow: 1px 3px 3px 3px #00000061;
+    transition: all 0.5s linear;
+}
+
+ ._nav {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+._li {
+    height: 50px;
+    position: relative;
+    box-shadow: 0px 1px 3px 1px #cbced1, inset -8px -8px 8px #fff;
+}
+
+._a {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid darkgray;
+    text-decoration: none;
+    display: block;
+    height: 100%;
+    width: 100%;
+    line-height: 50px;
+    color: dimgray;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding-left: 25%;
+    border-left: 5px solid transparent;
+    letter-spacing: 1px;
+    transition: all 0.3s linear;
+}
+
+ ._text {
+    transition: all .4s linear;
+}
+
+ ._li:hover ._text {
+    margin-left: 20px
+}
+
+._active ._a {
+    color: #afaab1;
+    border-left: 5px solid #8e8491;
+    background-color: #ADADAD;
+    outline: 0;
+    text-decoration: none;
+}
+
+._li:not(.active):hover ._a {
+    
+    color: darkgrey;
+    border-left: 5px solid #FCFCFC;
+    text-decoration: none;
+    box-shadow: inset 8px 8px 8px #cbced1, inset -8px -8px 8px #fff;
+}
+
+._span[class ^= "icon"] {
+    text-decoration: none;
+    position: absolute;
+    left: 20px;
+    font-size: 1.5em;
+    transition: all 0.3s linear;
+}
+
+@media only screen and (max-width : 860px) {
+    ._text {
+        text-decoration: none;
+        display: none;
+    }
+
+     ._nav-container, ._a {
+        width: 70px;
+    }
+
+     ._a:hover {
+        width: 200px;
+        z-index: 1;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        border-bottom: 1px solid black;
+        box-shadow: 0 0 1px 1px black;
+    }
+         ._a:hover ._text {
+            display: block;
+            padding-left: 30%;
+        }
+}
+
+@media only screen and (max-width: 480px) {
+     ._nav-container, ._a {
+        width: 50px;
+    }
+
+    ._span[class ^= "icon"] {
+        text-decoration: none;
+        left: 8px;
+    }
+}

@@ -1,0 +1,668 @@
+﻿@model IEnumerable<CallBackUtility.Models.Recording>
+
+<link href="~/Content/bootstrap-multiselect.css" rel="stylesheet" />
+<link href="~/Content/bootstrap-datetimepicker.css" rel="stylesheet" />
+
+<style>
+    .dataTables_scrollHeadInner {
+        width: auto !important;
+    }
+    .popup {
+        position: fixed;
+        top: 50% !important;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .panel {
+        margin-bottom: 20px;
+        background-color: transparent;
+    }
+
+    .custom-processing-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        font-size: 20px;
+        text-align: center;
+        padding-top: 50vh; /* Vertically center the text */
+        box-sizing: border-box;
+        z-index: 9999; /* Ensure the popup appears above other content */
+    }
+
+    .btn-primary {
+        border-color: transparent;
+        background-color: transparent !important;
+        font-size: 22px;
+    }
+
+
+    /* Modal Content */
+    .modal-content {
+        top: 50%;
+        text-align: center;
+        vertical-align: middle;
+        color: white;
+        background-color: transparent;
+        margin: auto;
+        padding: 20px;
+        border: none;
+        width: 80%;
+    }
+
+
+
+
+    .dataTables_scrollHeadInner, .dataTable {
+        width: 100% !important;
+    }
+
+    .loader-txt
+    p {
+        font-size: 13px;
+        color: #666;
+    }
+
+    small {
+        font-size: 11.5px;
+        color: #999;
+    }
+
+
+
+
+    td.details-control {
+        background: url('../../Content/img/details_open.png') no-repeat left center !important;
+        cursor: pointer;
+    }
+
+    tr.dt-hasChild td.details-control {
+        background: url('../../Content/img/details_close.png') no-repeat left center !important;
+    }
+
+    button {
+        border-style: hidden;
+        border-radius: 23px;
+        box-shadow: inset 8px 8px 8px #cbced1, inset -8px -8px 8px #fff;
+    }
+
+    .dataTables_wrapper {
+        margin-bottom: 7px
+    }
+
+    audio::-webkit-media-controls-panel {
+        color: yellow !important;
+    }
+
+
+    audio::-webkit-media-controls-play-button,
+    audio::-webkit-media-controls-panel {
+        background-color: lightgray;
+        background-clip: border-box;
+    }
+
+    .bi-play {
+        cursor: pointer;
+        text-shadow: initial;
+    }
+
+    .bi-play-circle-fill {
+        cursor: pointer;
+        text-shadow: initial;
+    }
+
+    .bi-play-circle-fill {
+        cursor: pointer;
+        text-shadow: none;
+    }
+
+    .btnRecycle {
+        margin-top: 2px;
+        margin-right: 5px;
+        float: right;
+    }
+
+    .dvPageCOntent {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    .hh2-header-bar {
+        font-family: auto !important;
+        font-size: 22px !important;
+        background: #eeeeee !important;
+    }
+
+        .hh2-header-bar > div > h2 {
+            font-size: 22px !important;
+            color: #8702a8 !important;
+        }
+
+    .btnGreen {
+        float: left;
+    }
+
+    .table {
+        margin-bottom: 0px;
+    }
+
+    .table-striped {
+        margin-left: 0px;
+        overflow-x: visible;
+    }
+
+
+    .dataTables_scrollBody {
+        background-color: lightgray !important;
+    }
+
+    #btnPrint {
+        padding-left: 9px;
+        padding-right: 9px;
+    }
+
+
+    .txtDatetime {
+        z-index: 1 !important;
+    }
+</style>
+
+@section Scripts {
+    <script src="~/Content/Scripts/bootstrap-datetimepicker.min.js"></script>
+
+    <script src="~/Content/Scripts/bootstrap-multiselect.js"></script>
+
+    <script>
+        var totalcount = 0;
+        var neRows = '';
+        var audio = document.getElementById('callAudio');
+        var _datatable;
+
+        var _pagedUrl = "/Ajax/_Index";
+        var collapsedGroups = {};
+        $(document).ready(function () {
+
+
+            $('#dvCallPlayer').slideUp();
+            var currentDate = new Date();
+
+            var startDatePicker = $('#starttime').datetimepicker({
+                defaultDate: new Date(currentDate.getFullYear(),
+                    currentDate.getMonth() - 1,
+                    currentDate.getDate()),
+                'ignoreReadonly': true,
+                icons: {
+                    up: 'fa fa-arrow-up',
+                    down: 'fa fa-arrow-down'
+                },
+                showClose: true,
+
+                format: 'DD/MM/YYYY hh:mm A'
+            }).on('dp.change', function (selected) {
+
+                var startDate = new Date(selected.date);
+                startDate.setMonth(startDate.getMonth() + 1);
+                if (startDatePicker) {
+                    $('#endtime input').val(('0' + startDate.getDate()).slice(-2) + '/' + ('0' + (startDate.getMonth() + 1)).slice(-2) + '/' + startDate.getFullYear() + ' 11:59 PM');
+                } //alert('1');
+                initTable();
+            });
+
+            var endDatePicker = $('#endtime').datetimepicker({
+                defaultDate: new Date(currentDate.getFullYear(),
+                    currentDate.getMonth(),
+                    currentDate.getDate(), '11', '59') + "PM",
+                icons: {
+                    up: 'fa fa-arrow-up',
+                    down: 'fa fa-arrow-down'
+                },
+                showClose: true,
+
+                ignoreReadonly: true,
+
+                format: 'DD/MM/YYYY hh:mm A'
+            }).on('dp.change', function (selected) {
+                var endDate = new Date(selected.date);
+                endDate.setMonth(endDate.getMonth() - 1);
+                if (startDatePicker) {
+                    $('#starttime input').val(('0' + endDate.getDate()).slice(-2) + '/' + ('0' + (endDate.getMonth() + 1)).slice(-2) + '/' + endDate.getFullYear() + ' 12:00 AM');
+                } //alert('2');
+                initTable();
+            });
+
+            loadMultiselects('ddlCallType');
+            $('.dataTables_wrapper').slideDown();
+            $('.modal-backdrop').appendTo('.dvPageCOntent');
+
+            $(document.body).on('click', '.details-control', function () {
+                $('#tblCDRdata_processing').show();
+
+                setTimeout(detailControlClick($(this)), 1000);
+
+
+            });
+
+            initTable();
+
+        });
+        function detailControlClick(_this) {
+            var isShow = true;
+
+            $(".dataTable tr.dt-hasChild").each(function (e) {
+                if (_this.find('div').attr('id') != _this.children('div').attr('id')) {
+                    _this.removeClass('dt-hasChild');
+                    _this.next('tr.child').remove();
+                    isShow = false;
+                }
+            });
+
+            if (_this.parent('tr').hasClass('dt-hasChild')) {
+                _this.parent('tr').removeClass('dt-hasChild');
+                _this.parent().next('tr.child').remove();
+                isShow = false;
+            } else { isShow = true; }
+            if (isShow) {
+                var recording = JSON.stringify({ recordingId: _this.children('div').attr('id') });
+                $.ajax({
+                    url: '/Recordings/getChildRecordings',
+                    type: 'POST',
+                    data: recording,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (json) {
+                        if (json) {
+                            if (json.count > 0) {
+                                var childRowsHtml = '<tr class="child"><td colspan="11"><table class="table" >';
+                                var recordings = json.recording;
+                                for (var i = 0; i < recordings.length; i++) {
+                                    childRowsHtml = childRowsHtml + '<tr  ><td><button onclick="playAudios(' + recordings[i].RecordId + ' ,this)"><i class="fa fa-play call" ></i></button></td><td>' + recordings[i]._startDayName + '</td><td>' + recordings[i]._startDate + '</td><td>' + recordings[i].core_callingparty + '</td><td>' + recordings[i].core_calledparty + '</td><td>' + recordings[i].inum + '</td><td>' + recordings[i].agentname + '</td><td>' + recordings[i].core_callid + '</td><td>' + recordings[i].core_globalcallid + '</td><td>' + recordings[i].core_calldirection + '</td><td>' + recordings[i].isInComing + '</td></tr>';
+                                }
+                                if (_this.parent('tr').next('tr.child').length > 0) {
+                                    _this.parent('tr').next('tr.child').remove();
+                                }
+                                _this.parent('tr').after(childRowsHtml + '</table></td></tr>');
+                                _this.parent('tr').addClass('dt-hasChild');
+                            } else {}
+                        }
+                        $('#tblCDRdata_processing').hide();
+                    }
+                });
+            }
+          //  $('#tblCDRdata_processing').hide();
+        }
+
+
+        function initTable() {
+
+            if (_datatable != undefined) {
+
+                _datatable.ajax.reload();
+                //_datatable.ajax.url(_pagedUrl).load();
+                //_datatable.clear().draw();
+            }
+            else {
+
+
+                _datatable = $('#tblCDRdata').DataTable({
+                    dom: '<"top"i>Bfrt<"bottom"lp><"clear">',
+                  
+                    //drawCallback: function (settings) {
+
+                    //    // Show processing popup on entire body
+                    //    // $('.dataTables_scroll .dataTables_scrollBody').append('<div class="custom-processing-popup">Processing...</div>');
+                    //    var tbody = $(this);
+                    //    tbody.append('<tr style="width:100%;"><td style="width:100%;  margin: 0 auto; " class="popup " colspan="10">Processing...</td></tr>');
+                    ///*},*/
+                    language: {
+                        //  processing: '<tbody class="custom-processing-popup modal-dialog-centered"><tr><td colspan="2">Processing...</td></tr></tbody>'
+                        processing: '<tbody style="color:white !important;font-weight:bold;" class=" custom-processing-popup modal-dialog-centered"><tr style="width:100%;"><td style="width:100%;  margin: 0 auto; " class="popup " colspan="10">Processing...</td></tr></tbody>'
+                    },
+                    scrollCollapse: true,
+                    order: [[1, "asc"]],
+                    buttons: [
+                        {
+                            extend: 'print',
+                            className: ' btnMeezan btnHide',
+                            exportOptions: {
+                                modifier: {
+                                    search: 'applied',
+                                    order: 'applied'
+                                }
+                            }
+                        }, {
+                            extend: "pdfHtml5",
+                            text: 'PDF',
+                            messageTop: function () { return new Date().toString() },
+                            className: ' btnRed  btnHide',
+                            orientation: 'landscape',
+                            pageSize: 'LEGAL',
+                            exportOptions: {
+                                modifier: {
+                                    search: 'applied',
+                                    order: 'applied'
+                                }
+                            }
+                        }, {
+                            extend: 'excel',
+                            text: 'Export To Excel',
+                            className: ' btnBlue btnHide',
+                            exportOptions: {
+                                modifier: {
+                                    search: 'applied',
+                                    order: 'applied'
+                                }
+                            }
+                        }
+                        , {
+                            action: function (e, dt, node, config) {
+
+                                _datatable.ajax.reload();
+                            },
+                            text: 'Search',
+                            className: ' btnGreen searchbutton'
+                        }
+                    ],
+                    lengthMenu: [
+                        [50, 100, 200, 300, 400, 500, 1000],
+                        ['50', '100', '200', '300', '400', '500', '1000']
+                    ],
+                    scrollX: true,
+                    scrollY: 900,
+                    //scrollCollapse: true,
+                    processing: true,
+                    deferRender: true,
+                    fixedHeader: true,
+                    autoWidth: true,
+                   // responsive: true,
+                    retrieve: true,
+                    Filter: true,
+                    processing: true,
+                    serverSide: true,
+                    stateSave: true,
+                    createdRow: function (row, data, index) {
+                        if (data.sessionsCount > 1) {
+                            $('td:eq(0)', row).addClass('details-control');
+                        }
+                    },
+                    ajax: {
+                        "type": "POST",
+                        "url": _pagedUrl,
+                        data: function (d) {
+                            // setTimeout(500000);
+                            d.ringstarttime = $('#starttime input').val();
+                            d.ringendtime = $('#endtime input').val();
+                            d.inums = $('#txtInum').val();
+                            d.dailedNos = $('#txtDailedNo').val();
+                            d.calltypes = $('#ddlCallType').next().find('button').attr('title');
+                            d.callingNos = $('#txtCallingNo').val();
+                            return d;
+                        },
+                        "dataSrc": function (json) {
+
+                            //setTimeout(500000);
+                            if (json.recordsTotal > 0) {
+
+                                // alert('loaded');
+                                //   $('#tblCDRdata_processing').hide();
+                                $('.btnHide').slideDown();
+                                _data = json.data;
+                            } else {
+                                //   alert('loaded');
+                                json.data = [];
+                                $('.btnHide').slideUp();
+                            }
+                            return json.data;
+                        }
+                    },
+                    columns: [
+                        {
+                            data: null, orderable: false, visible: true, render: function (data, type, row) {
+                                if (data.sessionsCount > 1) {
+                                    return ' <div style="float:right;" id="' + data.RecordId + '" > <button onclick="playAudios(' + data.RecordId + ',this)"><i class="fa fa-play call" ></i></button></div > '
+                                } else {
+                                    return '<div style="float:right;"><button onclick="playAudio( JSON.stringify({ recordingId:' + data.RecordId + '}),this)"><i class="fa fa-play call" ></i></button></div>'
+                                }
+                            }
+                        }
+                        , { data: '_startDayName', orderable: true, visible: true }
+                        , { data: '_startDate', orderable: true, visible: true }
+                        , { data: 'core_callingparty', orderable: true, visible: true }
+                        , { data: 'core_calledparty', orderable: true, visible: true }
+                        , { data: 'inum', orderable: true, visible: true }
+                        , { data: 'agentname', orderable: true, visible: true }
+                        , { data: 'core_callid', orderable: true, visible: true }
+                        , { data: 'core_globalcallid', orderable: true, visible: true }
+                        , { data: 'core_calldirection', orderable: true, visible: true }
+                        , { data: 'isInComing', orderable: true, visible: true }
+                        , { data: 'sessionsCount', orderable: true, visible: false }
+                    ]
+                });
+            }
+            //$('#tblCDRdata_filter input.searchbutton').unbind();
+            //$('#tblCDRdata_filter input.searchbutton').bind('blur', function (e) {
+            //    _datatable.search(this.value).draw();
+            //});
+
+        }
+
+        function playAudio(recordingId) {
+            $('#tblCDRdata_processing').show();
+            setTimeout(_playAudio(recordingId), 500);
+
+        }
+        function _playAudio(recordingId) {
+
+            $.ajax({
+                url: '/Recordings/getChildRecording',
+                type: 'POST',
+                data: recordingId,
+                contentType: 'application/json; charset=utf-8',
+                success: function (json) {
+                    if (json) {
+                        $('#dvCallPlayer').slideDown();
+                        audio.src = json.filepath;
+                        audio.play();
+                        audio.addEventListener('ended', function () {
+                            audio.pause();
+                        });
+                    }
+                    $('#tblCDRdata_processing').hide();
+                }
+            });
+        }
+
+      
+
+        function playAudios(recordingId, object) {
+            var recording = JSON.stringify({ recordingId: recordingId });
+            if (object.parentElement.parentElement.className == "details-control") {
+
+                playChildAudios(recording);
+            } else {
+                playAudio(recording)
+            }
+        }
+
+        function playChildAudios(recording) {
+            $('#tblCDRdata_processing').show();
+            setTimeout(_playChildAudios(recording), 2000);
+        }
+
+        function _playChildAudios(recording) {
+            $.ajax({
+                url: '/Recordings/getRecordings',
+                type: 'POST',
+                data: recording,
+                contentType: 'application/json; charset=utf-8',
+                success: function (json) {
+                    if (json) {
+                        if (json.filepath && json.filepath.length > 0) {
+                            var lstsongNames = json.filepath;
+                            audio.src = lstsongNames[0];
+                            var curPlaying = 0;
+                            audio.addEventListener('ended', function () {
+                                if (audio.src.indexOf(lstsongNames[lstsongNames.length - 1]) == -1) {
+                                    audio.src = audio.src.replace(lstsongNames[curPlaying], lstsongNames[++curPlaying]);
+                                    audio.play();
+                                } else {
+                                    audio.pause();
+                                }
+                            });
+                            $('#dvCallPlayer').slideDown();
+                        }
+                        $('#tblCDRdata_processing').hide();
+                    }                   
+                }
+            });
+        }
+
+        function loadMultiselects(elementId) {
+            if ($('#' + elementId + '')) {
+                $('#' + elementId + '').multiselect({
+                    maxHeight: 200,
+                    buttonWidth: '93%',
+                    includeSelectAllOption: true,
+                    onChange: function () {
+                        var selected = this.$select.val() + ',' + $('#' + elementId + '').attr('options');
+                        if (this.$select.val()) {
+                            $('#' + elementId + '').attr('options', selected);
+                        }
+                    },
+                    buttonText: function (options, select) {
+                        var numberOfOptions = $(this).children('option').length;
+                        if (options.length === 0) {
+                            return 'None Selected';
+                        }
+                        else {
+                            if (options.length > 0) {
+                                if (options.length === numberOfOptions) {
+                                    return 'All Selected';
+                                } else {
+                                    return options.length + ' selected';
+                                }
+                            } else {
+                                var selected = '';
+                                options.each(function () {
+                                    var label = ($(this).attr('label') !== undefined) ? $(this).attr('label') : $(this).html();
+                                    selected += label + ', ';
+                                });
+                                return selected.substr(0, selected.length - 2);
+                            }
+                        }
+                    }
+                });
+                $('#' + elementId + '').focus();
+                $('#' + elementId + '').multiselect('selectAll', false);
+                $('#' + elementId + '').multiselect('updateButtonText');
+            }
+        }
+    </script>
+    @*<script src="~/scripts/jquery.signalR-2.4.3.min.js"></script>
+        <script src="~/signalr/hubs" type="text/javascript"></script>
+        <script src="~/scripts/_Hub.js"></script>*@
+}
+<div class="pagetitle">
+    <h1>Replay Calls</h1>
+</div>
+<hr />
+<div class="col-md-12 dvPageCOntent">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="dataTables_wrapper form-inline">
+                <div class="row">
+                    <div class="col-sm-4 dataTables_length">
+                        <label class="col-sm-3" style="top:8px;padding-left:0px;padding-right:3px;text-align:right;">
+                            Calling No.
+                        </label>
+                        <div class="col-sm-9">
+                            <input type="text" id="txtCallingNo" class="form-control text-box single-line" value="" />
+                            @*<select id="ddlCallingNos" style="width: 240px;" class=" form-control  multiple" multiple="multiple"></select>*@
+                        </div>
+
+                    </div>
+
+                    <div class="col-sm-4 dataTables_length">
+                        <label class="col-sm-3" style="top: 8px; padding-left: 0px; padding-right: 3px; text-align: right;">
+                            Inum
+                        </label>
+                        <div class="col-sm-9">
+                            @*<select id="ddlInums" style="width: 240px;" class=" form-control  multiple" multiple="multiple"></select>*@
+                            <input type="text" id="txtInum" class="form-control text-box single-line" value="" />
+                        </div>
+                    </div>
+                    <div class="col-sm-4 dataTables_length">
+                        <label class="col-sm-4" for="txtDatetime" style="top: 8px; padding-left: 0px;  text-align: right; "> Call Start Time </label>
+                        <div style="border-style: hidden; border-radius: 23px; box-shadow: inset 8px 8px 8px #cbced1, inset -8px -8px 8px #fff; }
+
+" class='col-sm-8 dataTables_length input-group date' id='starttime'>
+                            <input id="txtDatetime" type='text' class="txtDatetime form-control" readonly />
+                            <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 dataTables_length">
+                        <label class="col-sm-3" style="top:9px;padding-left:0px;padding-right:0px;text-align:right;">
+                            Call Type
+                        </label>
+                        <div class="col-sm-7" style="padding-right:0px;">
+                            <select id="ddlCallType" aria-controls="dataTables-example" class="form-control  " multiple="multiple">
+                                <option value="InComing" selected>InComing</option>
+                                <option value="Outgoing">Outgoing</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 dataTables_length">
+                        <label class="col-sm-3" style="top:9px;padding-left:0px;padding-right:0px;text-align:right;">
+                            Dialed No.
+                        </label>
+                        <div class="col-sm-9">
+                            @*< id="ddlDailedNos" style="width: 240px;" class=" form-control  multiple" multiple="multiple"></select>*@
+                            <input type="text" id="txtDailedNo" class="form-control text-box single-line" value="" />
+
+                        </div>
+                    </div>
+                    <div class="col-sm-4 dataTables_length">
+                        <label class="col-sm-4" for="enddate" style="top: 8px; padding-left: 0px; text-align: right; "> Call End Time </label><div class='col-sm-8 dataTables_length input-group date' id='endtime'>
+                            <input type='text' id="enddate" class="txtDatetime form-control" readonly />
+                            <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="dvCallPlayer" class="row">
+                <audio controls autoplay id="callAudio" src="#">
+                </audio>
+            </div>
+        </div>
+        <div class="panel-body" style="padding-top:0px;">
+            <div class="table-wrapper">
+                <table class="table table-striped table-bordered table-hover tblBlack " id="tblCDRdata">
+                    <thead>
+                        <tr>
+                            <th>Play Calls</th>
+                            <th>Day</th>
+                            <th>Date</th>
+                            <th>Calling Number</th>
+                            <th>Called Number</th>
+                            <th>Inum</th>
+                            <th>Agent Name</th>
+                            <th>Call Id</th>
+                            <th>Global Call Id</th>
+                            <th>Direction</th>
+                            <th>InComing/Outgoing</th>
+                            <th>SessionCount</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

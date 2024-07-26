@@ -1,0 +1,26 @@
+﻿@model CallBackUtility.Models.LoginViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutAccount.cshtml";
+}
+@using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "p-3 mt-3", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-field d-flex align-items-center">
+        @Html.TextBoxFor(m => m.Email, htmlAttributes: new { @PlaceHolder = "Email", @class = "form-control input-sm chat-input" })
+
+        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+
+    </div>
+    <div class="form-field d-flex align-items-center">
+
+        @Html.PasswordFor(m => m.Password, htmlAttributes: new { @PlaceHolder = "Password", @class = "form-control input-sm chat-input" })
+        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Log in" class="btn btn-default" />
+        </div>
+    </div>
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+}

@@ -1,0 +1,206 @@
+﻿@model CallBackUtility.Models.ApplicationUser
+@{
+    ViewBag.Title = "Create User Account";
+}
+<style>
+    .width100 {
+        width: 100%;
+    }
+
+    .col-md-11 {
+        padding-right: 19px;
+    }
+</style><div class="pagetitle">
+    <h1>Create User</h1>
+</div>
+<hr />
+<div class="dvContainer">
+    <div class="col-md-1">
+        @Html.ActionLink("Back", "Index", "Users", null, htmlAttributes: new { @Title = "Back", @class = "btnBack" })
+    </div>
+    @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "col-md-7 form-horizontal", role = "form" }))
+    {
+        @*@Html.HiddenFor(model => model.RoleName)*@
+        @Html.HiddenFor(model => model.UserProfileImagePath, htmlAttributes: new { @id = "UserProfileImagePath" })
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary("", new { @class = "text-danger" })
+
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.FirstName, htmlAttributes: new { @class = "control-label col-md-5" })
+            <div class="col-md-7">
+                @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.LastName, htmlAttributes: new { @class = "control-label col-md-5" })
+            <div class="col-md-7">
+                @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-md-5">Upload Profile Image</label>
+            <div class="col-md-7">
+                <input type="file" name="ImageToUpload" id="fu-my-auto-upload" value="" class="btn active form-control" />
+            </div>
+        </div>
+        @*<div class="form-group">
+                @Html.LabelFor(model => model.UserId, htmlAttributes: new { @class = "control-label col-md-5" })
+                <div class="col-md-7">
+                    @Html.EditorFor(model => model.UserId, new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>*@
+        <div class="form-group">
+            @Html.LabelFor(m => m.Email, new { @class = "col-md-5 control-label" })
+            <div class="col-md-7">
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control txtEmail", autocomplete = "off", @placeholder = "abc@abc.com" })
+            </div>
+        </div> <div class="form-group">
+            @Html.LabelFor(model => model.RoleId, htmlAttributes: new { @class = "control-label col-md-5" })
+            <div class="col-md-7">
+                @Html.DropDownListFor(model => model.RoleId, (IEnumerable<SelectListItem>)ViewBag.Roles, "Select Role", htmlAttributes: new { @class = "form-control" })
+
+            </div>
+        </div>
+        @*<div class="form-group">
+                @Html.LabelFor(m => m.emailDomain, new { @class = "col-md-5 control-label" })
+                <div class="col-md-7">
+                    @Html.TextBoxFor(m => m.emailDomain, new { @class = "form-control ", @placeholder = "mail.pronet-tech.net" })
+                </div>
+            </div>*@
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.ContactNo, new { @class = "col-md-5 control-label" })
+            <div class="col-md-7">
+                @Html.TextBoxFor(m => m.ContactNo, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Password, new { @class = "col-md-5 control-label" })
+            <div class="col-md-7">
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-5 control-label" })
+            <div class="col-md-7">
+                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-5 col-md-7">
+                <input type="submit" id="btnRegister" class="btn btn-default btnBlue" value="Register" />
+            </div>
+        </div>
+    }
+</div>
+@{string userPic = System.Configuration.ConfigurationManager.AppSettings["UserImageUplaodPath"].ToString() +"ProfileImage.jpg";
+    }
+<div class="col-md-4"><img class="dvUploadedImage " id="uploadedUserImage" src=@userPic alt="No Image" /></div>
+@section Scripts {
+
+    <script src="~/Content/FileUpload/jquery-ui-1.9.2.min.js"></script>
+    <script src="~/Content/FileUpload/jquery.fileupload.js"></script>
+    <script src="~/Content/FileUpload/jquery.fileupload-ui.js"></script>
+    <script src="~/Content/FileUpload/jquery.iframe-transport.js"></script>
+    @*<script src="~/Scripts/client.js"></script>*@
+    <script>
+        var productArray = [];
+        var selectedRoleName;
+        $(document).ready(function () {
+            //set_ddlRole($("#RoleId :selected").val());
+            initAutoFileUpload();
+
+            //$('#btnSave_pop').click(function () {
+            //    if ($('#Modal_popup').find('.p_title').html() == AddContactNo) {
+            //        var _contactNo = $('#txtContactNo').val();
+            //        if ($.trim(_contactNo).length) {
+            //            if (validateMobileNumber(_contactNo, 'txtContactNo')) {
+            //                Contactnos.push(_contactNo);
+            //                loadContactsDDL(Contactnos);
+            //                $("#Modal_popup").modal('hide');
+            //            } else { showGroupOpConfirm('Invalid contact no!', "0"); }
+            //        } else { showGroupOpConfirm('Contact number is required!', "0"); }
+            //    }
+            //});
+
+            $('#btnRegister').click(function () {
+                $('#ContactNos').val(Contactnos);
+                productArray = $("input[type='checkbox'][class='chkProduct']:checked").map(function () {
+                    return this.id;
+                }).get();
+
+            });
+
+
+            $('#lblMessage').val('');
+            $('#Email').val('');
+        });
+
+        //function set_ddlRole(selectedRoleId) {
+        //    selectedRoleName = $.trim($("#RoleId :selected").text());
+        //    if ((selectedRoleName == "Power User") || (selectedRoleName == "System Administrator") || (selectedRoleName == "Select Role")) {
+        //        if (!$('#dvAgent').is(":hidden")) {
+        //            $("#dvAgent").slideUp();
+        //        }
+        //    } else {
+        //        if ($('#dvAgent').is(":hidden")) {
+        //            $("#dvAgent").slideDown();
+        //        }
+        //    }
+        //}
+
+        function initAutoFileUpload() {
+            'use strict';
+            var file = $('#fu-my-auto-upload').fileupload({
+                autoUpload: true,
+                url: '/Users/UploadUserProfileImage',
+                dataType: 'json',
+                add: function (e, data) {
+                    var jqXHRData = data;
+                    if (jqXHRData) {
+                        var isStartUpload = true;
+                        var uploadFile = jqXHRData.files[0];
+                        if (!(/\.(gif|jpg|jpeg|tiff|png)$/i).test(uploadFile.name)) {
+                            alert('You must select an image file only');
+                            isStartUpload = false;
+                        }
+                        //else if (uploadFile.size > 4000000) { // 4mb
+                        //    alert('Please upload a smaller image, max size is 4 MB');
+                        //    isStartUpload = false;
+                        //}
+                        //
+                        if (isStartUpload) {
+                            jqXHRData.submit().done(function (data, textStatus) {
+                                if (data.isUploaded && textStatus == "success") {
+                                    var imageLink =  data.filepath;
+                                    $('#uploadedUserImage').attr("src", imageLink);
+                                    $('#UserProfileImagePath').val('');
+                                    $('#UserProfileImagePath').val(imageLink);
+                                    // var url = $('#uploadedUserImage').attr('src');
+                                    //console.log(url);
+                                    //file[0].value;
+                                    alert('Image have been uploaded successfully');
+                                }
+                                else {
+                                    alert('Image not uploaded successfully');
+                                }
+                            })
+                                .error(function (data, textStatus, errorThrown) {
+                                    if (typeof (data) != 'undefined' || typeof (textStatus) != 'undefined' || typeof (errorThrown) != 'undefined') {
+                                        alert(textStatus + errorThrown + data);
+                                    }
+                                });
+                        }
+                    }
+                    return false;
+                },
+                fail: function (event, data) {
+                    if (data.files[0].error) {
+                        alert(data.files[0].error);
+                    }
+                }
+            });
+        }
+    </script>
+}

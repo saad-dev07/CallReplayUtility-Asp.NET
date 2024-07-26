@@ -1,0 +1,158 @@
+﻿@model CallBackUtility.Models.ApplicationUser
+
+<div class="pagetitle">
+    <h1>Update User</h1>
+</div>
+<hr />
+<div class="dvContainer">
+    <div class="col-md-1">
+        @Html.ActionLink("Back", "Index", "Users", null, htmlAttributes: new { @Title = "Back", @class = "btnBack" })
+    </div>
+    <div class="col-md-6">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+        <div class="form-horizontal">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.UserProfileImagePath, htmlAttributes: new { @id = "UserProfileImagePath" })
+            @Html.HiddenFor(model => model.UserId)
+            <div class="form-group">
+                @Html.LabelFor(model => model.FirstName, htmlAttributes: new { @class = "control-label col-md-4" })
+                <div class="col-md-8">
+                    @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.LastName, htmlAttributes: new { @class = "control-label col-md-4" })
+                <div class="col-md-8">
+                    @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-4">Upload Profile Image</label>
+                <div class="col-md-8">
+                    <input type="file" name="ImageToUpload" id="fu-my-auto-upload" value="" class="btn active form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-4" })
+                <div class="col-md-8">
+                    @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.RoleId, htmlAttributes: new { @class = "control-label col-md-4" })
+                <div class="col-md-8">
+                    @Html.DropDownListFor(model => model.RoleId, (IEnumerable<SelectListItem>)ViewBag.Roles, "Select Role", htmlAttributes: new { @class = "form-control" })                  
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.ContactNo, htmlAttributes: new { @class = "control-label col-md-4" })
+                <div class="col-md-8">
+                    @Html.EditorFor(model => model.ContactNo, new { htmlAttributes = new { @class = "form-control", autocomplete = "off" } })
+                    @Html.ValidationMessageFor(model => model.ContactNo, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Password, htmlAttributes: new { @class = "control-label col-md-4" })
+                <div class="col-md-8">
+                    @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @class = "form-control", @id = "Password" } })
+                    @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.ConfirmPassword, htmlAttributes: new { @class = "control-label col-md-4" })
+                <div class="col-md-8">
+                    @Html.EditorFor(model => model.ConfirmPassword, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-4 col-md-8">
+                    <input type="submit" value="Save" id="btnEditUser" class="btnBlue btnSave btn btn-default" />
+                </div>
+            </div>
+        </div>
+            <input type="hidden" name="UserId" value="@Model.Id" />
+        }
+    </div>
+    <div class="col-md-5"><img class="dvUploadedImage " id="uploadedUserImage" src="@Model.UserProfileImagePath" alt="No Image" /></div>
+</div>
+
+
+@section Scripts {
+    <script src="~/Content/FileUpload/jquery-ui-1.9.2.min.js"></script>
+    <script src="~/Content/FileUpload/jquery.fileupload.js"></script>
+    <script src="~/Content/FileUpload/jquery.fileupload-ui.js"></script>
+    <script src="~/Content/FileUpload/jquery.iframe-transport.js"></script>
+    <script>
+      
+        var productIdArray = [];
+        var productArray = [];
+
+        $(document).ready(function () {
+            initAutoFileUpload();
+          
+
+           
+
+          
+
+            $('#lblMessage').val('');
+        });
+
+       
+        function initAutoFileUpload() {
+            'use strict';
+            $('#fu-my-auto-upload').fileupload({
+                autoUpload: true,
+                url: '/Users/UploadUserProfileImage',
+                dataType: 'json',
+                add: function (e, data) {
+                    var jqXHRData = data;
+                    if (jqXHRData) {
+                        var isStartUpload = true;
+                        var uploadFile = jqXHRData.files[0];
+                        if (!(/\.(gif|jpg|jpeg|tiff|png)$/i).test(uploadFile.name)) {
+                            alert('You must select an image file only');
+                            isStartUpload = false;
+                        }
+                        //else if (uploadFile.size > 4000000) { // 4mb
+                        //    alert('Please upload a smaller image, max size is 4 MB');
+                        //    isStartUpload = false;
+                        //}
+                        //
+                        if (isStartUpload) {
+                            jqXHRData.submit().done(function (data, textStatus) {
+                                if (data.isUploaded && textStatus == "success") {
+                                        var imageLink =  data.filepath;
+                                        $('#uploadedUserImage').attr("src", imageLink);
+                                        $('#UserProfileImagePath').val('');
+                                    $('#UserProfileImagePath').val(imageLink);
+                                   // var url = $('#uploadedUserImage').attr('src');
+                                    }
+                                    else {
+                                        alert('Image not uploaded successfully');
+                                    }
+                                })
+                                .error(function (data, textStatus, errorThrown) {
+                                    if (typeof (data) != 'undefined' || typeof (textStatus) != 'undefined' || typeof (errorThrown) != 'undefined') {
+                                        alert(textStatus + errorThrown + data);
+                                    }
+                                });
+                        }
+                    }
+                    return false;
+                },
+                fail: function (event, data) {
+                    if (data.files[0].error) {
+                        alert(data.files[0].error);
+                    }
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,129 @@
+﻿@{
+    @model System.Web.Mvc.HandleErrorInfo
+    Layout = "~/Views/Shared/_LayoutAccount.cshtml";
+}
+<style>
+    button {
+        border-style: hidden;
+        border-radius: 23px;
+        box-shadow: inset 8px 8px 8px #cbced1, inset -8px -8px 8px #fff;
+    }
+
+    .dataTables_wrapper {
+        margin-bottom: 7px
+    }
+
+    audio::-webkit-media-controls-panel {
+        color: yellow !important;
+    }
+
+
+    audio::-webkit-media-controls-play-button,
+    audio::-webkit-media-controls-panel {
+        background-color: lightgray;
+        background-clip: border-box;
+    }
+
+    .bi-play {
+        cursor: pointer;
+        text-shadow: initial;
+    }
+
+    .bi-play-circle-fill {
+        cursor: pointer;
+        text-shadow: initial;
+    }
+
+    .bi-play-circle-fill {
+        cursor: pointer;
+        text-shadow: none;
+    }
+
+    .btnRecycle {
+        margin-top: 2px;
+        margin-right: 5px;
+        float: right;
+    }
+
+    .dvPageCOntent {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    .hh2-header-bar {
+        font-family: auto !important;
+        font-size: 22px !important;
+        background: #eeeeee !important;
+    }
+
+        .hh2-header-bar > div > h2 {
+            font-size: 22px !important;
+            color: #8702a8 !important;
+        }
+
+    .btnGreen {
+        float: left;
+    }
+
+    .table {
+        margin-bottom: 0px;
+    }
+
+    .table-striped {
+        margin-left: 0px;
+        overflow-x: visible;
+    }
+
+
+    .dataTables_scrollBody {
+        background-color: lightgray !important;
+    }
+
+    #btnPrint {
+        padding-left: 9px;
+        padding-right: 9px;
+    }
+
+    #myModal {
+        display: block; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background: url(/Content/img/header-background.png) repeat-y center;
+        background-size: 100%;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+        box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+    }
+
+    /* Modal Content */
+    .modal-content {
+        top: 50%;
+        text-align: center;
+        vertical-align: middle;
+        color: white;
+        background-color: transparent;
+        margin: auto;
+        padding: 20px;
+        border: none;
+        width: 80%;
+    }
+
+    .txtDatetime {
+        z-index: 1 !important;
+    }
+</style>
+
+
+
+
+<h1>Application Error</h1>
+<hr />
+<p>An error occurred while processing your request.</p>
+@*<p>@Model.Exception.Message</p>*@
