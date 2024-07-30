@@ -13,7 +13,7 @@ namespace CallBackUtility.Models
         [StringLength(10)]
         public string startdayname { get; set; }
         public decimal t_duration { get; set; }
-        public string _duration { get; set; }
+        public decimal duration { get; set; }
         [NotMapped]
         public int _year { get; set; }
         [StringLength(10)]

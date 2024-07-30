@@ -399,7 +399,8 @@
                                 var childRowsHtml = '<tr class="child"><td colspan="11"><table class="table" >';
                                 var recordings = json.recording;
                                 for (var i = 0; i < recordings.length; i++) {
-                                    childRowsHtml = childRowsHtml + '<tr  ><td><button inum="' + recordings[i].inum + '"  tarid="' + recordings[i].tarid + '"  onclick="playsAudio(this)"><i class="fa fa-play call" ></i></button></td><td>' + recordings[i].startdayname + '</td><td>' + recordings[i]._startdate + '</td><td>' + toHHMMSS(recordings[i]._duration) + '</td><td>' + recordings[i].callingparty + '</td><td>' + recordings[i].calledparty + '</td><td>' + recordings[i].agentname + '</td><td>' + recordings[i].callid + '</td><td>' + recordings[i].skill + '</td><td>' + recordings[i].services + '</td><td>' + callType(recordings[i].dirn) + '</td></tr>';
+                                    childRowsHtml = childRowsHtml + '<tr  ><td><button inum="' + recordings[i].inum + '"  tarid="' + recordings[i].tarid + '"  onclick="playsAudio(this)"><i class="fa fa-play call" ></i></button></td><td>' + recordings[i].startdayname + '</td><td>' + recordings[i]._startdate + '</td><td>' +
+                                        toHHMMSS (recordings[i].duration) + '</td><td>' + recordings[i].callingparty + '</td><td>' + recordings[i].calledparty + '</td><td>' + recordings[i].agentname + '</td><td>' + recordings[i].callid + '</td><td>' + recordings[i].skill + '</td><td>' + recordings[i].services + '</td><td>' + callType(recordings[i].dirn) + '</td></tr>';
                                 }
                                 if (_this.parents('tr').next('tr.child').length > 0) {
                                     _this.parents('tr').next('tr.child').remove();
@@ -554,6 +555,7 @@
         }
 
         function toHHMMSS(value) {
+           
             //alert(value);
             var sec_num = Math.round(value); // don't forget the second param
             var hours = Math.floor(sec_num / 3600);
